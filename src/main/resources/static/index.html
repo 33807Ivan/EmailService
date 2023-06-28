@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Email Service</title>
+    <style>
+        table.styled-table {
+            width: 100%;
+            border-collapse: collapse;
+            border: 1px solid #ddd;
+            font-size: 14px;
+        }
+
+        table.styled-table th,
+        table.styled-table td {
+            padding: 12px 15px;
+            text-align: left;
+            vertical-align: top;
+        }
+
+        table.styled-table thead th {
+            background-color: #f5f5f5;
+            border-bottom: 2px solid #ddd;
+        }
+
+        table.styled-table tbody td {
+            border-bottom: 1px solid #ddd;
+        }
+    </style>
+</head>
+<body>
+<form id="mailboxForm">
+    <label for="host">Host:</label><br>
+    <input type="text" id="host" name="host"><br>
+    <label for="port">Port:</label><br>
+    <input type="text" id="port" name="port"><br>
+    <label for="user">User:</label><br>
+    <input type="text" id="user" name="user"><br>
+    <label for="password">Password:</label><br>
+    <input type="password" id="password" name="password"><br>
+    <input type="submit" value="Submit">
+</form>
+<table id="emailTable" class="styled-table">
+    <thead>
+    <tr>
+        <th>UUID</th>
+        <th>Subject</th>
+        <th>Content</th>
+        <th>Attachment</th>
+    </tr>
+    </thead>
+    <tbody></tbody>
+</table>
+<script src="app.js"></script>
+</body>
+</html>
