@@ -1,22 +1,30 @@
-FROM openjdk:17-alpine
+FROM gradle:7.6.1-jdk17-alpine AS build
 
-# Set the Gradle version
-ARG GRADLE_VERSION=7.6.1
-
-# Download and install Gradle
-RUN apk update && apk add --no-cache wget unzip \
-    && wget "https://services.gradle.org/distributions/gradle-${GRADLE_VERSION}-bin.zip" \
-    && unzip "gradle-${GRADLE_VERSION}-bin.zip" \
-    && rm "gradle-${GRADLE_VERSION}-bin.zip"
-
-# Set the PATH environment variable to include Gradle
-ENV PATH="/gradle-${GRADLE_VERSION}/bin:${PATH}"
-
-# Copy the kotlin-email-service directory to the /app directory
-COPY . /app
-
+# Set the working directory.
 WORKDIR /app
 
-# Set the default command to run the application
-CMD ["java", "-jar", "/app/build/libs/*.jar"]
+# Copy the Gradle configuration files to the Docker image.
+# This includes the `build.gradle.kts` file and `gradle` directory with the `gradle-wrapper.properties` file.
+COPY build.gradle.kts gradle.properties settings.gradle ./
+COPY gradle gradle
 
+# Copy the source code to the Docker image.
+COPY src src
+
+# Build the application using Gradle.
+# This will download all necessary dependencies and create an executable JAR file.
+RUN gradle bootJar --no-daemon
+
+# Use the official OpenJDK image for a lean production stage of our multi-stage build.
+# https://hub.docker.com/_/openjdk
+# Use an Alpine-based image for smallest size.
+FROM openjdk:17-alpine
+
+# Set the working directory.
+WORKDIR /app
+
+# Copy the jar file from the build stage to the production stage.
+COPY --from=build /app/build/libs/*.jar email-service.jar
+
+# Run the application.
+CMD ["java", "-jar", "/app/build/libs/email-service.jar"]
