@@ -1,38 +1,39 @@
 package pl.emailservice.email_service.controllers
 
+import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Test
+import org.mockito.Mockito.`when`
+import org.mockito.Mockito.mock
+import reactor.core.publisher.Flux
+import org.springframework.http.codec.ServerSentEvent
 import pl.emailservice.email_service.models.Email
 import pl.emailservice.email_service.service.MessageService
-import org.junit.jupiter.api.Assertions.assertEquals
-import org.junit.jupiter.api.BeforeEach
-import org.junit.jupiter.api.Test
-import org.mockito.Mock
-import org.mockito.Mockito.`when`
-import org.mockito.MockitoAnnotations
-import org.springframework.http.ResponseEntity
-import java.util.*
 
 class MessageControllerTest {
 
-    @Mock
-    private lateinit var messageService: MessageService
+    @Test
+    fun redirectToIndex_ShouldReturnRedirectView() {
 
-    private lateinit var emailApiController: MessageController
+        val messageService = mock(MessageService::class.java)
+        val controller = MessageController(messageService)
 
-    @BeforeEach
-    fun setUp() {
-        MockitoAnnotations.openMocks(this)
-        emailApiController = MessageController(messageService)
+        val result = controller.redirectToIndex()
+
+        assert(result is String)
+        assertEquals("redirect:/index.html", result)
     }
 
     @Test
-    fun testGetRecentOutlookEmails() {
-        val emails = listOf(Email(UUID.randomUUID(), "Subject2", "Content2", emptyList()))
-        `when`(messageService.outlookEmails).thenReturn(mutableMapOf<String, Email>().apply {
-            emails.forEach { put(it.uuid.toString(), it) }
-        })
+    fun streamOutlookEmails_ShouldReturnFluxOfServerSentEvent() {
 
-        val response = emailApiController.getRecentOutlookEmails()
+        val messageService = mock(MessageService::class.java)
+        val controller = MessageController(messageService)
+        val expectedEvents = Flux.just(ServerSentEvent.builder<Email>().build())
 
-        assertEquals(ResponseEntity.ok(emails), response)
+        `when`(messageService.streamOutlookEmails()).thenReturn(expectedEvents)
+
+        val result = controller.streamOutlookEmails()
+
+        assert(result == expectedEvents)
     }
 }
