@@ -10,6 +10,11 @@ import reactor.core.publisher.Flux
 @RequestMapping("/api")
 class MessageController(private val messageService: MessageService) {
 
+    @GetMapping("/")
+    fun redirectToIndex(): String {
+        return "redirect:/index.html"
+    }
+
     @GetMapping("/outlook/emails", produces = ["text/event-stream"])
     fun streamOutlookEmails(): Flux<ServerSentEvent<Email>> {
         return messageService.streamOutlookEmails()
